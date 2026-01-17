@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Pixelify Sans', sans-serif;
+            padding: 10px;
+            user-select: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        body::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        .container {
+            width: 100%;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .color-group {
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Pixelify Sans', sans-serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .reset-btn {
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Customize Colors</h2>
+        <div class="color-group">
+            <label>Background:</label>
+            <input type="color" id="bgColor" value="#ffc0cb">
+        </div>
+        <div class="color-group">
+            <label>Border:</label>
+            <input type="color" id="borderColor" value="#ff0000">
+        </div>
+        <div class="color-group">
+            <label>Title/Calendar:</label>
+            <input type="color" id="accentColor" value="#c7328b">
+        </div>
+        <div class="color-group">
+            <label>Text:</label>
+            <input type="color" id="textColor" value="#ffffff">
+        </div>
+        <div class="button-group">
+            <button id="applyBtn">Apply</button>
+            <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Load saved colors
+        function loadSavedColors() {
+            const savedBg = localStorage.getItem('bgColor');
+            const savedBorder = localStorage.getItem('borderColor');
+            const savedAccent = localStorage.getItem('accentColor');
+            const savedText = localStorage.getItem('textColor');
+            
+            if (savedBg) document.getElementById('bgColor').value = savedBg;
+            if (savedBorder) document.getElementById('borderColor').value = savedBorder;
+            if (savedAccent) document.getElementById('accentColor').value = savedAccent;
+            if (savedText) document.getElementById('textColor').value = savedText;
+        }
+
+        // Apply colors
+        function applyColors() {
+            const colors = {
+                bgColor: document.getElementById('bgColor').value,
+                borderColor: document.getElementById('borderColor').value,
+                accentColor: document.getElementById('accentColor').value,
+                textColor: document.getElementById('textColor').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('bgColor', colors.bgColor);
+            localStorage.setItem('borderColor', colors.borderColor);
+            localStorage.setItem('accentColor', colors.accentColor);
+            localStorage.setItem('textColor', colors.textColor);
+            
+            // Send to main window
+            ipcRenderer.send('update-colors', colors);
+        }
+
+        // Reset colors
+        function resetColors() {
+            document.getElementById('bgColor').value = '#ffc0cb';
+            document.getElementById('borderColor').value = '#ff0000';
+            document.getElementById('accentColor').value = '#c7328b';
+            document.getElementById('textColor').value = '#ffffff';
+            applyColors();
+        }
+
+        // Initialize
+        loadSavedColors();
+
+        // Event listeners
+        document.getElementById('bgColor').addEventListener('input', applyColors);
+        document.getElementById('borderColor').addEventListener('input', applyColors);
+        document.getElementById('accentColor').addEventListener('input', applyColors);
+        document.getElementById('textColor').addEventListener('input', applyColors);
+        document.getElementById('applyBtn').addEventListener('click', applyColors);
+        document.getElementById('resetBtn').addEventListener('click', resetColors);
+    </script>
+</body>
+</html>
+
